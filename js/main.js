@@ -10,9 +10,16 @@ renderer.setClearColor(0xb7c3f3, 1)
 const light = new THREE.AmbientLight( 0xffffff ); // soft white light 
 scene.add( light );
 
+// Instantiate a loader
+const loader = new THREE.GLTFLoader();
+
 // Global Variables
-const start_position = 3
+const start_position = 4
 const end_position = -start_position
+let text = document.querySelector('.text')
+const TIME_LIMIT = 15
+let gameStat = "loading"
+let isLookingBackward = true
 
 
 function createCube(size, positionX, rotY, color= 0xfbc851){
@@ -27,8 +34,7 @@ function createCube(size, positionX, rotY, color= 0xfbc851){
 
 camera.position.z = 5;
 
-// Instantiate a loader
-const loader = new THREE.GLTFLoader();
+
 
 function delay(ms){
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -46,10 +52,12 @@ class Doll{
     lookBackward(){
         // this.doll.rotation.y= -3.15;
         gsap.to(this.doll.rotation, {y:-3.15, duration: .45})
+        setTimeout(() => isLookingBackward = true, 150)
     }
     lookForward(){
         // this.doll.rotation.y= -3.15;
         gsap.to(this.doll.rotation, {y:0, duration: .45})
+        setTimeout(() => isLookingBackward = false, 450)
     }
 
     async start(){
@@ -91,8 +99,20 @@ class Player{
         // this.playerInfo.velocity = 0
         gsap.to(this.playerInfo, {velocity: 0, duration: .1})
     }
-
+    check(){
+        if(this.playerInfo.velocity > 0 && !isLookingBackward){
+            text.innerText = "You Lose !"
+            text.style.color = "#8a0f03";
+            gameStat = "over"
+        }
+        if(this.playerInfo.positionX < end_position + .5){
+            text.innerText = "You Win !"
+            text.style.color = "#04820c";
+            gameStat = "over"
+        }
+    }
     update(){
+        this.check()
         this.playerInfo.positionX -= this.playerInfo.velocity
         this.player.position.x = this.playerInfo.positionX
     }
@@ -101,11 +121,41 @@ class Player{
 
 const player = new Player();
 let doll = new Doll();
+
+async function init(){
+    await delay(500)
+    text.innerText = "Starting in 3"
+    await delay(500)
+    text.innerText = "Starting in 2"
+    await delay(500)
+    text.innerText = "Starting in 1"
+    await delay(500)
+    text.innerText = "Go !!"
+    startGame()
+}
+
+function startGame(){
+    gameStat = "started"
+    const progressBar = createCube({w: 5, h: .1, d: 1}, 0, 0, 0xffeb0a)
+    progressBar.position.y = 3.35
+    gsap.to(progressBar.scale, {duration: TIME_LIMIT, x: 0, ease: "none"})
+    setTimeout(() => {
+        if(gameStat != "over"){
+            text.innerText = "Time Out!!!"
+        }
+    }, TIME_LIMIT * 1000)
+    
+    doll.start()
+}
+
+init()
+
 setTimeout(() => {
     doll.start()
 }, 1000);
 
 function animate() {
+    if(gameStat == "over") return
     renderer.render( scene, camera );
     // cube.rotation.x += 0.01;
     requestAnimationFrame( animate );
@@ -122,6 +172,7 @@ function onWindowResize(){
 }
 
 window.addEventListener('keydown', (e) =>{
+    if(gameStat != "started") return
     // alert(e.key) //ArrowDown
     if(e.key == "ArrowUp"){
         player.run()
