@@ -8,3 +8,4 @@ Here I implemented a simple but interestig squid game with help from FreeCodeCam
 
 ### Credits
 - [Freecodecamp](https://www.freecodecamp.org/)
+- [Model - SketchFab](https://sketchfab.com/3d-models/squid-game-giant-doll-7afd49dd07714651a6afa1fc4aac8576)
