@@ -14,6 +14,7 @@ scene.add( light );
 const start_position = 3
 const end_position = -start_position
 
+
 function createCube(size, positionX, rotY, color= 0xfbc851){
     const geometry = new THREE.BoxGeometry(size.w, size.h, size.d);
     const material = new THREE.MeshBasicMaterial( { color: color } );
@@ -28,6 +29,7 @@ camera.position.z = 5;
 
 // Instantiate a loader
 const loader = new THREE.GLTFLoader();
+
 
 class Doll{
     constructor(){
@@ -57,22 +59,50 @@ function createTrack(){
 }
 createTrack()
 
+
+class Player{
+    constructor(){
+        const geometry = new THREE.SphereGeometry( 0.3, 32, 16 );
+        const material = new THREE.MeshBasicMaterial( { color: 0xffffff } );
+        const sphere = new THREE.Mesh( geometry, material );
+        sphere.position.z = 1;
+        sphere.position.x = start_position;
+        scene.add( sphere );
+        this.player = sphere;
+        this.playerInfo = {
+            positionX: start_position,
+            velocity: 0
+        }
+    }
+
+    run(){
+        this.playerInfo.velocity = 0.03
+
+    }
+
+    update(){
+        this.playerInfo.positionX -= this.playerInfo.velocity
+        this.player.position.x = this.playerInfo.positionX
+    }
+}
+
+
+const player = new Player();
 let doll = new Doll();
 setTimeout(() => {
     doll.lookBackward()
-}, 2000);
+}, 1000);
 
 function animate() {
     renderer.render( scene, camera );
     // cube.rotation.x += 0.01;
-
     requestAnimationFrame( animate );
+    player.update()
 }
 animate();
 
 
 window.addEventListener( 'resize', onWindowResize, false );
-
 function onWindowResize(){
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
